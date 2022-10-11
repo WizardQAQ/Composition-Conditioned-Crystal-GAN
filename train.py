@@ -21,7 +21,7 @@ from models import *
 import random
 
 
-cuda = True if torch.cuda.is_available() else False
+cuda = False#True if torch.cuda.is_available() else False
 FloatTensor = torch.cuda.FloatTensor if cuda else torch.FloatTensor
 LongTensor = torch.cuda.LongTensor if cuda else torch.LongTensor
 
@@ -189,7 +189,7 @@ def main():
         print("net Q  weights are initialized")
 	
     one = torch.FloatTensor([1])
-    mone = one * -1    
+    mone = one.squeeze_() * -1    
 	
     if cuda:
         one = one.cuda()
@@ -293,6 +293,7 @@ def main():
             fake = autograd.Variable(fake)
             fake_feature, D_fake = discriminator(fake)
             
+            mg_label = torch.LongTensor(mg_label)
             cat_loss_mg_real = categorical_loss(real_mg_label,mg_label)
             cat_loss_mn_real = categorical_loss(real_mn_label,mn_label)
             cat_loss_o_real = categorical_loss(real_o_label, o_label)
@@ -341,11 +342,17 @@ def main():
                 fake_feature, G = discriminator(fake)
                 fake_mg_label, fake_mn_label, fake_o_label, fake_mg_cat, fake_mn_cat, fake_o_cat, fake_cell_pred = net_Q(fake)
                 
+                mg_label_fake = torch.LongTensor(mg_label_fake)
+                mn_label_fake = torch.LongTensor(mn_label_fake)
+                o_label_fake = torch.LongTensor(o_label_fake)
                 cat_loss_mg_fake = categorical_loss(fake_mg_label , mg_label_fake)
                 cat_loss_mn_fake = categorical_loss(fake_mn_label , mn_label_fake)
                 cat_loss_o_fake = categorical_loss(fake_o_label , o_label_fake)
 
 
+                fake_c_mg_int = torch.tensor(fake_c_mg_int)
+                fake_c_mn_int = torch.tensor(fake_c_mn_int)
+                fake_c_o_int = torch.tensor(fake_c_o_int)
                 cat_loss_mg_fake2 = categorical_loss(fake_mg_cat, fake_c_mg_int)
                 cat_loss_mn_fake2 = categorical_loss(fake_mn_cat, fake_c_mn_int)
                 cat_loss_o_fake2 = categorical_loss(fake_o_cat, fake_c_o_int)
